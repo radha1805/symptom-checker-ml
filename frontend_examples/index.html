@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptoms Checker</title>
+    <style>
+        /* Modern, clean styling for the symptoms checker interface */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .mode-toggle button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-toggle button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .probability {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .severity-low { background: #d4edda; color: #155724; }
+        .severity-medium { background: #fff3cd; color: #856404; }
+        .severity-high { background: #f8d7da; color: #721c24; }
+        .severity-critical { background: #f5c6cb; color: #721c24; }
+
+        .precautions {
+            margin-top: 10px;
+        }
+
+        .precautions ul {
+            margin-left: 20px;
+        }
+
+        .precautions li {
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .voice-status {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .voice-listening {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .voice-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Symptoms Checker</h1>
+            <p>AI-powered symptom analysis and disease prediction</p>
+            <div id="statusIndicator" class="status-indicator status-online">
+                🌐 Online Mode
+            </div>
+        </div>
+
+        <form id="symptomsForm">
+            <!-- Language Selection -->
+            <div class="form-group">
+                <label for="language">Language / भाषा / ਭਾਸ਼ਾ</label>
+                <select id="language" name="language">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                </select>
+            </div>
+
+            <!-- Input Mode Toggle -->
+            <div class="form-group">
+                <label>Input Mode</label>
+                <div class="mode-toggle">
+                    <button type="button" id="textMode" class="active">📝 Text</button>
+                    <button type="button" id="voiceMode">🎤 Voice</button>
+                </div>
+            </div>
+
+            <!-- Voice Status -->
+            <div id="voiceStatus" class="voice-status" style="display: none;"></div>
+
+            <!-- Text Input -->
+            <div class="form-group">
+                <label for="symptomsInput">Describe your symptoms</label>
+                <textarea id="symptomsInput" name="symptoms" placeholder="Enter your symptoms here... (e.g., I have a fever and headache)"></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button type="button" id="recordBtn" class="btn-secondary" style="display: none;">
+                    🎤 Start Recording
+                </button>
+                <button type="button" id="stopBtn" class="btn-danger" style="display: none;">
+                    ⏹️ Stop Recording
+                </button>
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    🔍 Analyze Symptoms
+                </button>
+            </div>
+
+            <!-- TTS Controls -->
+            <div class="button-group" id="ttsControls" style="display: none;">
+                <button type="button" id="speakBtn" class="btn-success">
+                    🔊 Speak Results
+                </button>
+                <button type="button" id="stopSpeakBtn" class="btn-secondary">
+                    ⏹️ Stop Speaking
+                </button>
+            </div>
+        </form>
+
+        <!-- Results Section -->
+        <div id="results" class="results">
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                🔄 Analyzing symptoms...
+            </div>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for the symptoms checker application
+        let currentMode = 'text';
+        let isRecording = false;
+        let recognition = null;
+        let currentResults = null;
+        let speechSynthesis = window.speechSynthesis;
+        let apiPort = null; // Will be detected automatically
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        /**
+         * Initialize the symptoms checker application
+         * Sets up event listeners and checks for browser capabilities
+         */
+        function initializeApp() {
+            // Detect API port first
+            detectApiPort();
+            
+            // Set up form submission
+            document.getElementById('symptomsForm').addEventListener('submit', handleFormSubmit);
+            
+            // Set up mode toggles
+            document.getElementById('textMode').addEventListener('click', () => switchMode('text'));
+            document.getElementById('voiceMode').addEventListener('click', () => switchMode('voice'));
+            
+            // Set up voice recording buttons
+            document.getElementById('recordBtn').addEventListener('click', startVoiceRecording);
+            document.getElementById('stopBtn').addEventListener('click', stopVoiceRecording);
+            
+            // Set up TTS buttons
+            document.getElementById('speakBtn').addEventListener('click', speakResults);
+            document.getElementById('stopSpeakBtn').addEventListener('click', stopSpeaking);
+            
+            // Check online/offline status
+            updateOnlineStatus();
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            
+            // Initialize Web Speech API if available
+            initializeSpeechRecognition();
+            
+            console.log('✅ Symptoms Checker initialized successfully');
+        }
+
+        /**
+         * Detect the API port automatically
+         * Tries ports 8000-8010 to find the running API
+         */
+        async function detectApiPort() {
+            const ports = [8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010];
+            
+            for (const port of ports) {
+                try {
+                    const response = await fetch(`http://localhost:${port}/health`, {
+                        method: 'GET',
+                        timeout: 1000 // 1 second timeout
+                    });
+                    
+                    if (response.ok) {
+                        apiPort = port;
+                        console.log(`🔍 API detected on port ${port}`);
+                        updateApiStatus(`🌐 Connected to API on port ${port}`);
+                        return;
+                    }
+                } catch (error) {
+                    // Port not available, continue to next
+                    continue;
+                }
+            }
+            
+            // No API found
+            apiPort = null;
+            console.log('⚠️ No API detected on ports 8000-8010');
+            updateApiStatus('❌ API not found - will use offline mode');
+        }
+        
+        /**
+         * Update API status display
+         * @param {string} message - Status message
+         */
+        function updateApiStatus(message) {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.textContent = message;
+            indicator.className = 'status-indicator status-online';
+        }
+
+        /**
+         * Update online/offline status indicator
+         */
+        function updateOnlineStatus() {
+            if (apiPort) {
+                updateApiStatus(`🌐 Connected to API on port ${apiPort}`);
+            } else {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.textContent = '📱 Offline Mode';
+                indicator.className = 'status-indicator status-offline';
+            }
+        }
+
+        /**
+         * Switch between text and voice input modes
+         * @param {string} mode - 'text' or 'voice'
+         */
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update button states
+            document.getElementById('textMode').classList.toggle('active', mode === 'text');
+            document.getElementById('voiceMode').classList.toggle('active', mode === 'voice');
+            
+            // Show/hide voice controls
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const voiceStatus = document.getElementById('voiceStatus');
+            
+            if (mode === 'voice') {
+                recordBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                voiceStatus.style.display = 'block';
+                
+                if (!recognition) {
+                    voiceStatus.innerHTML = '⚠️ Voice recognition not available in this browser';
+                    voiceStatus.className = 'voice-status voice-error';
+                }
+            } else {
+                recordBtn.style.display = 'none';
+                stopBtn.style.display = 'none';
+                voiceStatus.style.display = 'none';
+            }
+        }
+
+        /**
+         * Initialize Web Speech API for voice recognition
+         */
+        function initializeSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US'; // Default language
+                
+                recognition.onstart = function() {
+                    console.log('🎤 Voice recognition started');
+                    updateVoiceStatus('listening', '🎤 Listening... Speak now');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('symptomsInput').value = transcript;
+                    console.log('🎤 Voice recognition result:', transcript);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('🎤 Voice recognition error:', event.error);
+                    updateVoiceStatus('error', `Voice recognition error: ${event.error}`);
+                };
+                
+                recognition.onend = function() {
+                    console.log('🎤 Voice recognition ended');
+                    updateVoiceStatus('idle', 'Voice recognition stopped');
+                    isRecording = false;
+                    document.getElementById('recordBtn').style.display = 'block';
+                    document.getElementById('stopBtn').style.display = 'none';
+                };
+            } else {
+                console.warn('⚠️ Web Speech API not supported in this browser');
+            }
+        }
+
+        /**
+         * Update voice status display
+         * @param {string} status - 'listening', 'error', or 'idle'
+         * @param {string} message - Status message to display
+         */
+        function updateVoiceStatus(status, message) {
+            const voiceStatus = document.getElementById('voiceStatus');
+            voiceStatus.textContent = message;
+            voiceStatus.className = `voice-status voice-${status}`;
+        }
+
+        /**
+         * Start voice recording using Web Speech API
+         */
+        function startVoiceRecording() {
+            if (!recognition) {
+                updateVoiceStatus('error', 'Voice recognition not available');
+                return;
+            }
+            
+            try {
+                recognition.start();
+                isRecording = true;
+                document.getElementById('recordBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+            } catch (error) {
+                console.error('Error starting voice recognition:', error);
+                updateVoiceStatus('error', 'Failed to start voice recognition');
+            }
+        }
+
+        /**
+         * Stop voice recording
+         */
+        function stopVoiceRecording() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        }
+
+        /**
+         * Handle form submission for symptom analysis
+         * @param {Event} event - Form submit event
+         */
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const symptomsText = document.getElementById('symptomsInput').value.trim();
+            const language = document.getElementById('language').value;
+            
+            if (!symptomsText) {
+                alert('Please enter your symptoms');
+                return;
+            }
+            
+            // Show loading indicator
+            showLoading(true);
+            hideResults();
+            
+            try {
+                let response;
+                
+                if (navigator.onLine && apiPort) {
+                    // Online mode: Call cloud API
+                    response = await callCloudAPI(symptomsText, language);
+                } else {
+                    // Offline mode: Use rule-based prediction
+                    response = await callOfflinePrediction(symptomsText, language);
+                }
+                
+                displayResults(response);
+                
+            } catch (error) {
+                console.error('Error analyzing symptoms:', error);
+                showError('Failed to analyze symptoms. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        /**
+         * Call the cloud API for symptom analysis
+         * @param {string} symptomsText - User's symptom description
+         * @param {string} language - Language code
+         * @returns {Object} API response
+         */
+        async function callCloudAPI(symptomsText, language) {
+            if (!apiPort) {
+                throw new Error('API not available - no port detected');
+            }
+            
+            const requestBody = {
+                input: symptomsText,
+                input_type: 'text',
+                language: language,
+                mode: currentMode === 'voice' ? 'voice' : 'text'
+            };
+            
+            console.log(`🌐 Calling cloud API on port ${apiPort}:`, requestBody);
+            
+            const response = await fetch(`http://localhost:${apiPort}/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        /**
+         * Call offline rule-based prediction (stub implementation)
+         * @param {string} symptomsText - User's symptom description
+         * @param {string} language - Language code
+         * @returns {Object} Mock response
+         */
+        async function callOfflinePrediction(symptomsText, language) {
+            console.log('📱 Using offline prediction');
+            
+            // Simulate processing delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Mock rule-based prediction
+            // In a real implementation, this would use a local rule-based model
+            const mockResponse = {
+                input_text: symptomsText,
+                input_text_user_lang: symptomsText,
+                symptoms: ['fever', 'headache'],
+                predictions: [
+                    {
+                        disease: 'Common Cold',
+                        prob: 0.75,
+                        severity: 'Medium',
+                        precautions: ['Rest well', 'Stay hydrated', 'Take over-the-counter medication'],
+                        symptom_descriptions: {
+                            'fever': 'Elevated body temperature',
+                            'headache': 'Pain in the head or neck area'
+                        }
+                    },
+                    {
+                        disease: 'Flu',
+                        prob: 0.60,
+                        severity: 'High',
+                        precautions: ['Rest', 'Stay hydrated', 'Consult a doctor'],
+                        symptom_descriptions: {
+                            'fever': 'High body temperature',
+                            'headache': 'Severe head pain'
+                        }
+                    }
+                ],
+                language: language,
+                display_text: `Based on your symptoms, you may have Common Cold (probability: 75%, severity: Medium).`
+            };
+            
+            return mockResponse;
+        }
+
+        /**
+         * Display analysis results
+         * @param {Object} response - API response data
+         */
+        function displayResults(response) {
+            currentResults = response;
+            
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = '';
+            
+            // Display symptoms found
+            if (response.symptoms && response.symptoms.length > 0) {
+                const symptomsDiv = document.createElement('div');
+                symptomsDiv.innerHTML = `
+                    <h3>🔍 Symptoms Detected:</h3>
+                    <p><strong>${response.symptoms.join(', ')}</strong></p>
+                `;
+                resultsContent.appendChild(symptomsDiv);
+            }
+            
+            // Display predictions (use translated version if available)
+            const predictionsToShow = response.predictions_translated || response.predictions;
+            if (predictionsToShow && predictionsToShow.length > 0) {
+                const predictionsDiv = document.createElement('div');
+                predictionsDiv.innerHTML = '<h3>📊 Disease Predictions:</h3>';
+                
+                predictionsToShow.forEach((prediction, index) => {
+                    const predictionDiv = document.createElement('div');
+                    predictionDiv.className = 'result-item';
+                    
+                    const severityClass = `severity-${prediction.severity.toLowerCase()}`;
+                    
+                    predictionDiv.innerHTML = `
+                        <h3>${index + 1}. ${prediction.disease}</h3>
+                        <div>
+                            <span class="probability">${(prediction.prob * 100).toFixed(1)}%</span>
+                            <span class="severity ${severityClass}">${prediction.severity}</span>
+                        </div>
+                        ${prediction.precautions.length > 0 ? `
+                            <div class="precautions">
+                                <strong>Precautions:</strong>
+                                <ul>
+                                    ${prediction.precautions.map(precaution => `<li>${precaution}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    predictionsDiv.appendChild(predictionDiv);
+                });
+                
+                resultsContent.appendChild(predictionsDiv);
+            }
+            
+            // Display summary text
+            if (response.display_text) {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.innerHTML = `
+                    <h3>📝 Summary:</h3>
+                    <p>${response.display_text}</p>
+                `;
+                resultsContent.appendChild(summaryDiv);
+            }
+            
+            // Show TTS controls if voice mode
+            if (currentMode === 'voice') {
+                document.getElementById('ttsControls').style.display = 'flex';
+            }
+            
+            showResults();
+        }
+
+        /**
+         * Speak the results using Web Speech API or audio data
+         */
+        function speakResults() {
+            if (!currentResults || !currentResults.display_text) {
+                return;
+            }
+            
+            // Stop any current speech
+            stopSpeaking();
+            
+            if (currentResults.tts_audio_base64) {
+                // Play provided audio data
+                playAudioFromBase64(currentResults.tts_audio_base64);
+            } else {
+                // Use Web Speech API
+                const utterance = new SpeechSynthesisUtterance(currentResults.display_text);
+                
+                // Set language based on user selection
+                const languageMap = {
+                    'en': 'en-US',
+                    'hi': 'hi-IN',
+                    'pa': 'pa-IN'
+                };
+                utterance.lang = languageMap[currentResults.language] || 'en-US';
+                
+                utterance.onend = function() {
+                    console.log('🔊 Speech synthesis completed');
+                };
+                
+                utterance.onerror = function(event) {
+                    console.error('🔊 Speech synthesis error:', event.error);
+                };
+                
+                speechSynthesis.speak(utterance);
+                console.log('🔊 Speaking results using Web Speech API');
+            }
+        }
+
+        /**
+         * Play audio from base64 data
+         * @param {string} base64Data - Base64-encoded audio data
+         */
+        function playAudioFromBase64(base64Data) {
+            try {
+                // Convert base64 to blob
+                const audioData = atob(base64Data);
+                const audioArray = new Uint8Array(audioData.length);
+                for (let i = 0; i < audioData.length; i++) {
+                    audioArray[i] = audioData.charCodeAt(i);
+                }
+                
+                const audioBlob = new Blob([audioArray], { type: 'audio/mp3' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Create and play audio
+                const audio = new Audio(audioUrl);
+                audio.play();
+                
+                audio.onended = function() {
+                    URL.revokeObjectURL(audioUrl);
+                    console.log('🔊 Audio playback completed');
+                };
+                
+                audio.onerror = function(error) {
+                    console.error('🔊 Audio playback error:', error);
+                    URL.revokeObjectURL(audioUrl);
+                };
+                
+                console.log('🔊 Playing audio from base64 data');
+                
+            } catch (error) {
+                console.error('Error playing audio:', error);
+            }
+        }
+
+        /**
+         * Stop current speech synthesis
+         */
+        function stopSpeaking() {
+            speechSynthesis.cancel();
+            console.log('🔊 Speech synthesis stopped');
+        }
+
+        /**
+         * Show loading indicator
+         * @param {boolean} show - Whether to show loading
+         */
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
+            document.getElementById('submitBtn').disabled = show;
+        }
+
+        /**
+         * Show results section
+         */
+        function showResults() {
+            document.getElementById('results').classList.add('show');
+        }
+
+        /**
+         * Hide results section
+         */
+        function hideResults() {
+            document.getElementById('results').classList.remove('show');
+        }
+
+        /**
+         * Show error message
+         * @param {string} message - Error message to display
+         */
+        function showError(message) {
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = `
+                <div class="error">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+            showResults();
+        }
+
+        // Update recognition language when user changes language
+        document.getElementById('language').addEventListener('change', function() {
+            if (recognition) {
+                const languageMap = {
+                    'en': 'en-US',
+                    'hi': 'hi-IN',
+                    'pa': 'pa-IN'
+                };
+                recognition.lang = languageMap[this.value] || 'en-US';
+                console.log('🎤 Voice recognition language updated to:', recognition.lang);
+            }
+        });
+
+        // Log application state for debugging
+        console.log('🚀 Symptoms Checker Frontend loaded');
+        console.log('📱 Online status:', navigator.onLine);
+        console.log('🎤 Speech recognition available:', !!recognition);
+        console.log('🔊 Speech synthesis available:', !!speechSynthesis);
+    </script>
+</body>
+</html>
