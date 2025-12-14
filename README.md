@@ -1,3 +1,13 @@
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3.10-blue.svg" alt="Python Version"/>
+  <img src="https://img.shields.io/badge/FastAPI-API%20Backend-brightgreen.svg" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/ML-Model-orange.svg" alt="Machine Learning"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"/>
+  <img src="https://img.shields.io/github/last-commit/radha1805/symptom-checker-ml" alt="Last Commit"/>
+  <img src="https://img.shields.io/github/repo-size/radha1805/symptom-checker-ml" alt="Repo Size"/>
+</p>
+
+
 # Symptom Checker ML Model
 
 An AI-based symptom checker designed with a complete ML training pipeline, multilingual support, and a deployment-ready FastAPI backend.
@@ -151,4 +161,5 @@ Open to collaborations and improvements.
 ## 📜 License
 
 Released under the MIT License.
+
 
